@@ -2,17 +2,29 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import { UserService } from '../application/user.service.js';
 import { type CreateUserInputDto } from './input-dto/create-user.input-dto.js';
+import { UserQueryRepository } from '../infrastucture/user.query-repository.js';
+import { GetUserListQueryParams } from './input-dto/user-list.intut-dto.js';
 
 @Controller('users')
 export class UsersController {
-  constructor(protected readonly userService: UserService) {}
+  constructor(
+    protected readonly userService: UserService,
+    protected readonly userQueryRepository: UserQueryRepository,
+  ) {}
+
+  @Get()
+  public async getAllUsers(@Query() query: GetUserListQueryParams) {
+    return await this.userQueryRepository.findAll(query);
+  }
 
   @Post()
   public async createUser(@Body() body: CreateUserInputDto) {

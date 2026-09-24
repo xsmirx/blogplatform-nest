@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { User, UserDocument, type UserModel } from '../domain/user.entity.js';
 
 @Injectable()
-export class UsersRepository {
+export class UserRepository {
   constructor(@InjectModel(User.name) private UserModel: UserModel) {}
 
   async findById(id: string): Promise<UserDocument | null> {

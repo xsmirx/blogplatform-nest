@@ -5,16 +5,13 @@ export class UserViewDto {
   login: string;
   email: string;
   createdAt: Date;
-  firstName: string;
-  lastName: string | null;
 
   static mapToView(user: UserDocument): UserViewDto {
     const dto = new UserViewDto();
-
     dto.id = user.id;
     dto.email = user.email;
     dto.login = user.login;
-
+    dto.createdAt = user.createdAt;
     return dto;
   }
 }

@@ -5,7 +5,7 @@ import { UserRepository } from './infrastucture/user.repository.js';
 import { UserService } from './application/user.service.js';
 import { UsersController } from './api/users.controller.js';
 import { BcryptAdapter } from './infrastucture/bcrypt.adapter.js';
-import { UserQueryRepository } from './infrastucture/user.query-repository.js';
+import { UserQueryRepository } from './infrastucture/query/user.query-repository.js';
 
 @Module({
   imports: [

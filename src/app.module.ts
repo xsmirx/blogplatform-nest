@@ -4,6 +4,7 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { UsersAccountModule } from './modules/users-account/users-account.module.js';
 import { TestingModule } from './modules/testing/testing.module.js';
+import { BlogersPlatformModule } from './modules/blogers-platform/blogers-platform.module.js';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { TestingModule } from './modules/testing/testing.module.js';
       dbName: 'blogplatform-nest',
     }),
     UsersAccountModule,
+    BlogersPlatformModule,
     TestingModule,
   ],
   controllers: [AppController],

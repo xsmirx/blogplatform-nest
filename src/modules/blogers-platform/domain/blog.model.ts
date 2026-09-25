@@ -28,10 +28,10 @@ export class Blog {
     return blog as BlogDocument;
   }
 
-  public update(user: Partial<Blog>) {
-    this.name = user.name || this.name;
-    this.description = user.description || this.description;
-    this.websiteUrl = user.websiteUrl || this.websiteUrl;
+  public update(blog: Partial<Blog>) {
+    this.name = blog.name || this.name;
+    this.description = blog.description || this.description;
+    this.websiteUrl = blog.websiteUrl || this.websiteUrl;
   }
 }
 

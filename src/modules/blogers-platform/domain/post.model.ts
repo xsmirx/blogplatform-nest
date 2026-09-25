@@ -37,6 +37,15 @@ export class Post {
     post.content = content;
     post.blogId = new Types.ObjectId(blogId);
     post.blogName = blogName;
+    return post as PostDocument;
+  }
+
+  public update(blog: Omit<Partial<Post>, 'blogId'> & { blogId: string }) {
+    this.title = blog.title || this.title;
+    this.shortDescription = blog.shortDescription || this.shortDescription;
+    this.content = blog.content || this.content;
+    this.blogId = blog.blogId ? new Types.ObjectId(blog.blogId) : this.blogId;
+    this.blogName = blog.blogName || this.blogName;
   }
 }
 

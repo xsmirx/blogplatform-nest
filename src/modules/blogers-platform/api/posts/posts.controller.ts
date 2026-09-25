@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -13,12 +15,13 @@ import { UpdatePostInputDTO } from './input-dto/update-post.input-dto.js';
 import { GetPostListQueryParams } from './input-dto/post-list.input-dto.js';
 import { PostsService } from '../../application/posts.service.js';
 import { PostsQueryRepository } from '../../infrastucture/query/posts.query-repository.js';
+import { PostViewDTO } from './view-dto/post.view-dto.js';
 
 @Controller('posts')
 export class PostsController {
   constructor(
     protected readonly postsQueryRepository: PostsQueryRepository,
-    protected readonly postService: PostsService,
+    protected readonly postsService: PostsService,
   ) {}
 
   @Get()
@@ -32,11 +35,20 @@ export class PostsController {
   }
 
   @Post()
-  async createPost(@Body() body: CreatePostInputDTO) {}
+  async createPost(@Body() body: CreatePostInputDTO) {
+    const post = await this.postsService.create(body);
+    return PostViewDTO.mapToView(post);
+  }
 
   @Put()
-  async updatePost(@Param('id') id: string, @Body() body: UpdatePostInputDTO) {}
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updatePost(@Param('id') id: string, @Body() body: UpdatePostInputDTO) {
+    await this.postsService.update(id, body);
+  }
 
   @Delete(':id')
-  async deletePost() {}
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deletePost(@Param('id') id: string) {
+    return await this.postsService.delete(id);
+  }
 }

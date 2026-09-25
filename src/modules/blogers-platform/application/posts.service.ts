@@ -11,7 +11,7 @@ export class PostsService {
   constructor(
     @InjectModel(Post.name) protected readonly PostModel: PostModel,
     protected readonly postsRepository: PostsRepository,
-    protected readonly blogsReepository: BlogsRepository,
+    protected readonly blogsRepository: BlogsRepository,
   ) {}
 
   public async create({
@@ -20,7 +20,7 @@ export class PostsService {
     content,
     blogId,
   }: CreatePostInputDTO) {
-    const blog = await this.blogsReepository.findById(blogId);
+    const blog = await this.blogsRepository.findById(blogId);
     if (!blog) throw new NotFoundException();
     const post = this.PostModel.creeateInstance({
       title,
@@ -39,7 +39,7 @@ export class PostsService {
   ) {
     const post = await this.postsRepository.findById(id);
     if (!post) throw new NotFoundException();
-    const blog = await this.blogsReepository.findById(blogId);
+    const blog = await this.blogsRepository.findById(blogId);
     if (!blog) throw new NotFoundException();
     post.update({
       title,

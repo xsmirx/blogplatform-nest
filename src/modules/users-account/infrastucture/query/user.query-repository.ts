@@ -24,7 +24,7 @@ export class UserQueryRepository {
     }
     if (query.searchEmailTerm) {
       queryDocument.or([
-        this.UserModel.where('eemail')
+        this.UserModel.where('email')
           .regex(new RegExp(query.searchEmailTerm, 'i'))
           .getFilter(),
       ]);

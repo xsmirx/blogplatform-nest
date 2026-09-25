@@ -24,14 +24,11 @@ export class UserService {
     const passwordHash = await this.bcryptAdapter.generateHash(password);
     const user = this.UserModel.createInstance({ login, email, passwordHash });
     await this.usersRepository.save(user);
+    return user;
   }
 
   async delete(id: string) {
     const result = await this.usersRepository.delete(id);
-    if (!result) {
-      throw new NotFoundException();
-    } else {
-      return true;
-    }
+    if (!result) throw new NotFoundException();
   }
 }

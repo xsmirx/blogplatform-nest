@@ -4,3 +4,9 @@ export class CreatePostInputDTO {
   content: string;
   blogId: string;
 }
+
+export class CreatePostForBlogInputDTO {
+  title: string;
+  shortDescription: string;
+  content: string;
+}

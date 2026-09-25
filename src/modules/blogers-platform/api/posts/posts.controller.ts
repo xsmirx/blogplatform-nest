@@ -40,7 +40,7 @@ export class PostsController {
     return PostViewDTO.mapToView(post);
   }
 
-  @Put()
+  @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(@Param('id') id: string, @Body() body: UpdatePostInputDTO) {
     await this.postsService.update(id, body);

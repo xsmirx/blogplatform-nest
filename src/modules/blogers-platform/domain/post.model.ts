@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
 import { HydratedDocument, Model, Types, WithTimestamps } from 'mongoose';
 
 @Schema({ timestamps: true })
@@ -12,7 +13,7 @@ export class Post {
   @Prop({ type: String, minLength: 1, maxLength: 1024, required: true })
   content: string;
 
-  @Prop({ type: Types.ObjectId, required: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, required: true })
   blogId: Types.ObjectId;
 
   @Prop({ type: String, minLength: 1, maxLength: 256, required: true })

@@ -4,16 +4,23 @@ import { Post, type PostModel } from '../../domain/post.model.js';
 import { GetPostListQueryParams } from '../../api/posts/input-dto/post-list.input-dto.js';
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto.js';
 import { PostViewDTO } from '../../api/posts/view-dto/post.view-dto.js';
+import { Blog, type BlogModel } from '../../domain/blog.model.js';
 
 @Injectable()
 export class PostsQueryRepository {
   constructor(
     @InjectModel(Post.name) protected readonly PostModel: PostModel,
+    @InjectModel(Blog.name) protected readonly BlogModel: BlogModel,
   ) {}
 
   public async getAll(
     query: GetPostListQueryParams,
   ): Promise<PaginatedViewDto<PostViewDTO[]>> {
+    if (query.blogId) {
+      const blog = await this.BlogModel.findById(query.blogId);
+      if (!blog) throw new NotFoundException();
+    }
+
     const queryDocument = this.PostModel.find();
 
     if (query.blogId) {

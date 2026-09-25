@@ -1,9 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model, Types, WithTimestamps } from 'mongoose';
+import mongoose, {
+  HydratedDocument,
+  Model,
+  Types,
+  WithTimestamps,
+} from 'mongoose';
 
 @Schema({ _id: false })
 export class CommentatorInfo {
-  @Prop({ type: Types.ObjectId, required: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, required: true })
   userId: Types.ObjectId;
 
   @Prop({ type: String, minLength: 3, maxLength: 20, required: true })
@@ -24,7 +29,7 @@ export class Comment {
   @Prop({ type: CommentatorInfo, required: true })
   commentatorInfo: CommentatorInfo;
 
-  @Prop({ type: Types.ObjectId, required: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, required: true })
   postId: Types.ObjectId;
 
   @Prop({ type: LikesInfo, required: true })

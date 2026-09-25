@@ -13,6 +13,7 @@ import { UserService } from '../application/user.service.js';
 import { type CreateUserInputDto } from './input-dto/create-user.input-dto.js';
 import { GetUserListQueryParams } from './input-dto/user-list.intut-dto.js';
 import { UserQueryRepository } from '../infrastucture/query/user.query-repository.js';
+import { UserViewDto } from './view-dto/user.view-dto.js';
 
 @Controller('users')
 export class UsersController {
@@ -28,11 +29,12 @@ export class UsersController {
 
   @Post()
   public async createUser(@Body() body: CreateUserInputDto) {
-    await this.userService.create({
+    const user = await this.userService.create({
       login: body.login,
       email: body.email,
       password: body.password,
     });
+    return UserViewDto.mapToView(user);
   }
 
   @Delete(':id')

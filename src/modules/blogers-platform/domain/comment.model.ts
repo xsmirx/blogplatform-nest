@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model, Types } from 'mongoose';
+import { HydratedDocument, Model, Types, WithTimestamps } from 'mongoose';
 
 @Schema({ _id: false })
 export class CommentatorInfo {
@@ -52,7 +52,7 @@ export class Comment {
   }
 }
 
-export type CommentDocument = HydratedDocument<Comment>;
+export type CommentDocument = HydratedDocument<WithTimestamps<Comment>>;
 export type CommentModel = Model<CommentDocument> & typeof Comment;
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);

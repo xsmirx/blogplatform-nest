@@ -16,6 +16,10 @@ export class PostsQueryRepository {
   ): Promise<PaginatedViewDto<PostViewDTO[]>> {
     const queryDocument = this.PostModel.find();
 
+    if (query.blogId) {
+      queryDocument.where('blogId').equals(query.blogId);
+    }
+
     const filter = queryDocument.getFilter();
 
     const posts = await queryDocument

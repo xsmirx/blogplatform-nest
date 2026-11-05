@@ -1,0 +1,641 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "h14 API - V1",
+    "description": "Continue to migrate the application to nestjs. \n</br></br>Should complete:\n </br>✔ auth block, including password recovery, registration, login (possible without refreshToken flow).\n </br>✔ CRUD users (basic auth).\n",
+    "version": "h14"
+  },
+  "paths": {
+    "/hometask_14/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Try login user to the system",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/h05.db.LoginInputModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/h05.db.LoginInputModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/h05.db.LoginInputModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns JWT accessToken (expired after 5 minutes) in body.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/h06.db.LoginSuccessViewModel"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/h06.db.LoginSuccessViewModel"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/h06.db.LoginSuccessViewModel"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "If the inputModel has incorrect values",
+            "content": {
+              "text/plain": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              },
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              },
+              "text/json": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              }
+            }
+          },
+          "401": { "description": "If the password or login or email is wrong" }
+        }
+      }
+    },
+    "/hometask_14/api/auth/password-recovery": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Password recovery via Email confirmation. Email should be sent with RecoveryCode inside",
+        "requestBody": {
+          "description": "Email",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/h10.PasswordRecoveryInputModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/h10.PasswordRecoveryInputModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/h10.PasswordRecoveryInputModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Even if current email is not registered (for prevent user's email detection)"
+          },
+          "400": {
+            "description": "If the inputModel has invalid email (for example 222^gmail.com)"
+          },
+          "429": {
+            "description": "More than 5 attempts from one IP-address during 10 seconds"
+          }
+        }
+      }
+    },
+    "/hometask_14/api/auth/new-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Confirm Password recovery",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/h10.NewPasswordRecoveryInputModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/h10.NewPasswordRecoveryInputModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/h10.NewPasswordRecoveryInputModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "If code is valid and new password is accepted"
+          },
+          "400": {
+            "description": "If the inputModel has incorrect value (for incorrect password length) or RecoveryCode is incorrect or expired"
+          },
+          "429": {
+            "description": "More than 5 attempts from one IP-address during 10 seconds"
+          }
+        }
+      }
+    },
+    "/hometask_14/api/auth/registration-confirmation": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Confirm registration",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/h07.RegistrationConfirmationCodeModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/h07.RegistrationConfirmationCodeModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/h07.RegistrationConfirmationCodeModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "description": "Email was verified. Account was activated" },
+          "400": {
+            "description": "If the confirmation code is incorrect, expired or already been applied",
+            "content": {
+              "text/plain": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              },
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              },
+              "text/json": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              }
+            }
+          },
+          "429": {
+            "description": "More than 5 attempts from one IP-address during 10 seconds"
+          }
+        }
+      }
+    },
+    "/hometask_14/api/auth/registration": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Registration in the system. Email with confirmation code will be send to passed email address",
+        "requestBody": {
+          "description": "Data for registration",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/h05.db.UserInputModel" }
+            },
+            "text/json": {
+              "schema": { "$ref": "#/components/schemas/h05.db.UserInputModel" }
+            },
+            "application/*+json": {
+              "schema": { "$ref": "#/components/schemas/h05.db.UserInputModel" }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Input data is accepted. Email with confirmation code will be send to passed email address"
+          },
+          "400": {
+            "description": "If the inputModel has incorrect values (in particular if the user with the given email or login already exists)",
+            "content": {
+              "text/plain": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              },
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              },
+              "text/json": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              }
+            }
+          },
+          "429": {
+            "description": "More than 5 attempts from one IP-address during 10 seconds"
+          }
+        }
+      }
+    },
+    "/hometask_14/api/auth/registration-email-resending": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Resend confirmation registration Email if user exists",
+        "requestBody": {
+          "description": "Data for constructing new user",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/h07.RegistrationEmailResending"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/h07.RegistrationEmailResending"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/h07.RegistrationEmailResending"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Input data is accepted.Email with confirmation code will be send to passed email address.Confirmation code should be inside link as query param, for example: https://some-front.com/confirm-registration?code=youtcodehere"
+          },
+          "400": {
+            "description": "If the inputModel has incorrect values",
+            "content": {
+              "text/plain": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              },
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              },
+              "text/json": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              }
+            }
+          },
+          "429": {
+            "description": "More than 5 attempts from one IP-address during 10 seconds"
+          }
+        }
+      }
+    },
+    "/hometask_14/api/auth/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get information about current user",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { "$ref": "#/components/schemas/h06.db.MeViewModel" }
+              },
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/h06.db.MeViewModel" }
+              },
+              "text/json": {
+                "schema": { "$ref": "#/components/schemas/h06.db.MeViewModel" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        },
+        "security": [
+          { "bearer": ["Policy:", "Roles:", "AuthenticationSchemes:"] }
+        ]
+      }
+    },
+    "/hometask_14/api/testing/all-data": {
+      "delete": {
+        "tags": ["Testing"],
+        "summary": "Clear database: delete all data from all tables/collections",
+        "responses": { "204": { "description": "All data is deleted" } }
+      }
+    },
+    "/hometask_14/api/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Returns all users",
+        "parameters": [
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": { "type": "string", "default": "createdAt" }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "Default value: desc",
+            "schema": { "$ref": "#/components/schemas/h04.SortDirections" }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "pageNumber is number of portions that should be returned",
+            "schema": { "type": "integer", "format": "int32", "default": 1 }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "pageSize is portions size that should be returned",
+            "schema": {
+              "maximum": 20,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "searchLoginTerm",
+            "in": "query",
+            "description": "Search term for user Login: Login should contains this term in any position",
+            "schema": { "type": "string", "default": null }
+          },
+          {
+            "name": "searchEmailTerm",
+            "in": "query",
+            "description": "Search term for user Email: Email should contains this term in any position",
+            "schema": { "type": "string", "default": null }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Paginator<h05.db.UserViewModel>"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Paginator<h05.db.UserViewModel>"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Paginator<h05.db.UserViewModel>"
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        },
+        "security": [
+          { "basic": ["Policy:", "Roles:", "AuthenticationSchemes:basic"] }
+        ]
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Add new user to the system",
+        "requestBody": {
+          "description": "Data for constructing new user",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/h05.db.UserInputModel" }
+            },
+            "text/json": {
+              "schema": { "$ref": "#/components/schemas/h05.db.UserInputModel" }
+            },
+            "application/*+json": {
+              "schema": { "$ref": "#/components/schemas/h05.db.UserInputModel" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns the newly created user",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/h05.db.UserViewModel"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/h05.db.UserViewModel"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/h05.db.UserViewModel"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "If the inputModel has incorrect values. \r\n            <br /><br /><i>Note: If the error should be in the BLL, for example, \"the email address is not unique\", \r\n            do not try to mix this error with input validation errors in the middleware, \r\n            just return one element in the errors array</i>",
+            "content": {
+              "text/plain": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              },
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              },
+              "text/json": {
+                "schema": { "$ref": "#/components/schemas/APIErrorResult" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        },
+        "security": [
+          { "basic": ["Policy:", "Roles:", "AuthenticationSchemes:basic"] }
+        ]
+      }
+    },
+    "/hometask_14/api/users/{id}": {
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Delete user specified by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "No Content" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "If specified user is not exists" }
+        },
+        "security": [
+          { "basic": ["Policy:", "Roles:", "AuthenticationSchemes:basic"] }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "APIErrorResult": {
+        "type": "object",
+        "properties": {
+          "errorsMessages": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FieldError" },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FieldError": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Message with error explanation for certain field",
+            "nullable": true
+          },
+          "field": {
+            "type": "string",
+            "description": "What field/property of input model has error",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Paginator<h05.db.UserViewModel>": {
+        "required": ["items"],
+        "type": "object",
+        "properties": {
+          "pagesCount": { "type": "integer", "format": "int32" },
+          "page": { "type": "integer", "format": "int32" },
+          "pageSize": { "type": "integer", "format": "int32" },
+          "totalCount": { "type": "integer", "format": "int32" },
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/h05.db.UserViewModel" }
+          }
+        },
+        "additionalProperties": false
+      },
+      "h04.SortDirections": { "enum": ["asc", "desc"], "type": "string" },
+      "h05.db.LoginInputModel": {
+        "required": ["loginOrEmail", "password"],
+        "type": "object",
+        "properties": {
+          "loginOrEmail": { "type": "string" },
+          "password": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "h05.db.UserInputModel": {
+        "required": ["email", "login", "password"],
+        "type": "object",
+        "properties": {
+          "login": {
+            "maxLength": 10,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_-]*$",
+            "type": "string",
+            "description": "must be unique"
+          },
+          "password": { "maxLength": 20, "minLength": 6, "type": "string" },
+          "email": {
+            "pattern": "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
+            "type": "string",
+            "description": "must be unique",
+            "example": "example@example.dev"
+          }
+        },
+        "additionalProperties": false
+      },
+      "h05.db.UserViewModel": {
+        "required": ["createdAt", "email", "id", "login"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "login": { "type": "string" },
+          "email": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        },
+        "additionalProperties": false
+      },
+      "h06.db.LoginSuccessViewModel": {
+        "required": ["accessToken"],
+        "type": "object",
+        "properties": {
+          "accessToken": { "type": "string", "description": "JWT access token" }
+        },
+        "additionalProperties": false
+      },
+      "h06.db.MeViewModel": {
+        "required": ["email", "login", "userId"],
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" },
+          "login": { "type": "string" },
+          "userId": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "h07.RegistrationConfirmationCodeModel": {
+        "required": ["code"],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Code that be sent via Email inside link"
+          }
+        },
+        "additionalProperties": false
+      },
+      "h07.RegistrationEmailResending": {
+        "required": ["email"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "pattern": "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
+            "type": "string",
+            "description": "Email of already registered but not confirmed user",
+            "example": "example@example.com"
+          }
+        },
+        "additionalProperties": false
+      },
+      "h10.NewPasswordRecoveryInputModel": {
+        "required": ["newPassword", "recoveryCode"],
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "maxLength": 20,
+            "minLength": 6,
+            "type": "string",
+            "description": "New password"
+          },
+          "recoveryCode": { "type": "string", "description": "New password" }
+        },
+        "additionalProperties": false
+      },
+      "h10.PasswordRecoveryInputModel": {
+        "required": ["email"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "pattern": "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
+            "type": "string",
+            "description": "Email of registered user",
+            "example": "useremail@company.com"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "description": "Enter JWT Bearer token **_only_**",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "basic": { "type": "http", "scheme": "basic" },
+      "refreshToken": {
+        "type": "apiKey",
+        "description": "JWT refreshToken inside cookie. Must be correct, and must not expire",
+        "name": "refreshToken",
+        "in": "cookie"
+      }
+    }
+  }
+}

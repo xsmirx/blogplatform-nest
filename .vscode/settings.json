@@ -1,0 +1,7 @@
+{
+  "jestrunner.enableTestExplorer": true,
+  "jestrunner.vitestConfigPath": {
+    "**/*.e2e-spec.ts": "vitest.config.e2e.ts",
+    "**/*.spec.ts": "vitest.config.ts"
+  }
+}

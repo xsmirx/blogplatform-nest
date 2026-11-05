@@ -8,6 +8,8 @@ export default defineConfig({
   test: {
     globals: true,
     root: './',
-    include: ['**/*.spec.ts'],
+    // Юнит-тесты лежат рядом с исходниками; e2e живут в test/ и
+    // запускаются отдельным конфигом (vitest.config.e2e.ts).
+    include: ['src/**/*.spec.ts'],
   },
 });

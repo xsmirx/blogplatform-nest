@@ -3,6 +3,8 @@ import { User, type UserModel } from '../domain/user.entity.js';
 import { UserRepository } from '../infrastucture/user.repository.js';
 import { InjectModel } from '@nestjs/mongoose';
 import { BcryptAdapter } from '../infrastucture/bcrypt.adapter.js';
+import { DomainException } from '../../../core/exceptions/domain-exception.js';
+import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes.js';
 
 @Injectable()
 export class UserService {
@@ -21,6 +23,21 @@ export class UserService {
     email: string;
     password: string;
   }) {
+    const loginUser = await this.usersRepository.findByLogin(login);
+    if (loginUser !== null)
+      throw new DomainException({
+        code: DomainExceptionCode.ValidationError,
+        message: 'Validation failed',
+        extensions: [{ key: 'login', message: 'Login is not unique' }],
+      });
+    const emailUser = await this.usersRepository.findByEmail(email);
+    if (emailUser !== null)
+      throw new DomainException({
+        code: DomainExceptionCode.ValidationError,
+        message: 'Validation failed',
+        extensions: [{ key: 'email', message: 'Email is not unique' }],
+      });
+
     const passwordHash = await this.bcryptAdapter.generateHash(password);
     const user = this.UserModel.createInstance({ login, email, passwordHash });
     await this.usersRepository.save(user);

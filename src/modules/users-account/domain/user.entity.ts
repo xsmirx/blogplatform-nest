@@ -3,7 +3,7 @@ import { HydratedDocument, Model, WithTimestamps } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ minLength: 1, maxLength: 64, required: true, index: true })
+  @Prop({ minLength: 1, maxLength: 64, required: true, unique: true })
   login: string;
 
   @Prop({
@@ -11,7 +11,8 @@ export class User {
     minLength: 1,
     maxLength: 256,
     required: true,
-    index: true,
+    unique: true,
+    lowercase: true,
   })
   email: string;
 

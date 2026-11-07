@@ -9,6 +9,9 @@ export class TestingController {
   @Delete('all-data')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAll() {
-    await this.connection.dropDatabase();
+    const collections = this.connection.collections;
+    Object.values(collections).forEach((collection) => {
+      collection.deleteMany({});
+    });
   }
 }

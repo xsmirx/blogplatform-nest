@@ -10,6 +10,14 @@ export class UserRepository {
     return this.UserModel.findById(id);
   }
 
+  async findByLogin(login: string): Promise<UserDocument | null> {
+    return this.UserModel.findOne({ login });
+  }
+
+  async findByEmail(email: string): Promise<UserDocument | null> {
+    return this.UserModel.findOne({ email });
+  }
+
   async delete(id: string) {
     const result = await this.UserModel.findByIdAndDelete(id);
     return result !== null;

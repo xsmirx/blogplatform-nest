@@ -1,4 +1,5 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
+import { pipesSetup } from './pipes.setup.js';
 
 /**
  * Единая точка настройки Nest-приложения.
@@ -17,9 +18,5 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
  */
 export function appSetup(app: INestApplication): void {
   app.enableCors();
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-    }),
-  );
+  pipesSetup(app);
 }

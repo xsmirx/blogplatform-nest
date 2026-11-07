@@ -6,6 +6,8 @@ import { UsersAccountModule } from './modules/users-account/users-account.module
 import { TestingModule } from './modules/testing/testing.module.js';
 import { BlogersPlatformModule } from './modules/blogers-platform/blogers-platform.module.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_FILTER } from '@nestjs/core';
+import { DomainExceptionFilter } from './core/exceptions/filters/domain-exception.filter.js';
 
 @Module({
   imports: [
@@ -29,6 +31,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     TestingModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: DomainExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}

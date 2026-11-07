@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { BcryptAdapter } from '../infrastucture/bcrypt.adapter.js';
 import { DomainException } from '../../../core/exceptions/domain-exception.js';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes.js';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UserService {
@@ -39,8 +40,19 @@ export class UserService {
       });
 
     const passwordHash = await this.bcryptAdapter.generateHash(password);
-    const user = this.UserModel.createInstance({ login, email, passwordHash });
+    const confirmationCode = randomUUID();
+    const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const user = this.UserModel.createInstance({
+      login,
+      email,
+      passwordHash,
+      confirmationCode,
+      expirationDate,
+    });
     await this.usersRepository.save(user);
+
+    // s end email confirmaton
+
     return user;
   }
 

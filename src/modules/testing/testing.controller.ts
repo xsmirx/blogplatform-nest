@@ -10,8 +10,8 @@ export class TestingController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAll() {
     const collections = this.connection.collections;
-    Object.values(collections).forEach((collection) => {
-      collection.deleteMany({});
-    });
+    await Promise.all(
+      Object.values(collections).map((collection) => collection.deleteMany({})),
+    );
   }
 }

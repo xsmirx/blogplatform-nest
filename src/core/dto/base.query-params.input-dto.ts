@@ -1,5 +1,7 @@
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsEnum, IsInt, Max, Min } from 'class-validator';
+import { toPositiveIntOrDefault } from './helpers/to-positive-int-or-default.js';
+import { toEnumOrDefault } from './helpers/to-enum-or-default.js';
 
 export enum SortDirection {
   Asc = 'asc',
@@ -7,14 +9,18 @@ export enum SortDirection {
 }
 
 export class BaseQueryParams {
-  @Type(() => Number)
+  @Transform(toPositiveIntOrDefault(1))
   @IsInt()
+  @Min(1)
   pageNumber: number = 1;
 
-  @Type(() => Number)
+  @Transform(toPositiveIntOrDefault(10, 100))
   @IsInt()
+  @Min(1)
+  @Max(100)
   pageSize: number = 10;
 
+  @Transform(toEnumOrDefault(SortDirection, SortDirection.Desc))
   @IsEnum(SortDirection)
   sortDirection: SortDirection = SortDirection.Desc;
 

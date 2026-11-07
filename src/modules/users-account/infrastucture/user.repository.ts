@@ -1,6 +1,7 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { User, UserDocument, type UserModel } from '../domain/user.entity.js';
+import { isValidObjectId } from 'mongoose';
 
 @Injectable()
 export class UserRepository {
@@ -19,6 +20,7 @@ export class UserRepository {
   }
 
   async delete(id: string) {
+    if (!isValidObjectId(id)) return null;
     const result = await this.UserModel.findByIdAndDelete(id);
     return result !== null;
   }

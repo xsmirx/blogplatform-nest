@@ -14,7 +14,7 @@ export class BaseQueryParams {
   @Min(1)
   pageNumber: number = 1;
 
-  @Transform(toPositiveIntOrDefault(10, 100))
+  @Transform(toPositiveIntOrDefault(10, 20))
   @IsInt()
   @Min(1)
   @Max(100)

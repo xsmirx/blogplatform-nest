@@ -20,7 +20,7 @@ export class UserRepository {
   }
 
   async delete(id: string) {
-    if (!isValidObjectId(id)) return null;
+    if (!isValidObjectId(id)) return false;
     const result = await this.UserModel.findByIdAndDelete(id);
     return result !== null;
   }

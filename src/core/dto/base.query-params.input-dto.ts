@@ -17,7 +17,7 @@ export class BaseQueryParams {
   @Transform(toPositiveIntOrDefault(10, 20))
   @IsInt()
   @Min(1)
-  @Max(100)
+  @Max(20)
   pageSize: number = 10;
 
   @Transform(toEnumOrDefault(SortDirection, SortDirection.Desc))

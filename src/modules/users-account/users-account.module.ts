@@ -6,12 +6,13 @@ import { UserService } from './application/user.service.js';
 import { UsersController } from './api/users.controller.js';
 import { BcryptAdapter } from './infrastucture/bcrypt.adapter.js';
 import { UserQueryRepository } from './infrastucture/query/user.query-repository.js';
+import { AuthController } from './api/auth.controller.js';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
-  controllers: [UsersController],
+  controllers: [UsersController, AuthController],
   providers: [UserService, UserRepository, UserQueryRepository, BcryptAdapter],
 })
 export class UsersAccountModule {}

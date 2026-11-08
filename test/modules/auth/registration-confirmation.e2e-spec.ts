@@ -48,14 +48,16 @@ describe('POST /auth/registration-confirmation — подтверждение р
       expect(response.body).toEqual({});
     });
 
-    it('после подтверждения пользователь может залогиниться', async () => {
+    // Логин доступен и без подтверждения, поэтому статус аккаунта
+    // проверяем через registration-email-resending: по swagger он
+    // работает только для неподтверждённых (204), для подтверждённых — 400.
+
+    it('после подтверждения аккаунт считается подтверждённым', async () => {
       const { dto, code } = await register();
 
       await auth.confirmRegistration({ code }).expect(204);
 
-      await auth
-        .login({ loginOrEmail: dto.login, password: dto.password })
-        .expect(200);
+      await auth.resendRegistrationEmail({ email: dto.email }).expect(400);
     });
 
     it('подтверждение одного пользователя не затрагивает другого', async () => {
@@ -65,11 +67,8 @@ describe('POST /auth/registration-confirmation — подтверждение р
       await auth.confirmRegistration({ code: first.code }).expect(204);
 
       await auth
-        .login({
-          loginOrEmail: second.dto.login,
-          password: second.dto.password,
-        })
-        .expect(401);
+        .resendRegistrationEmail({ email: second.dto.email })
+        .expect(204);
     });
   });
 
@@ -126,9 +125,8 @@ describe('POST /auth/registration-confirmation — подтверждение р
 
       await auth.confirmRegistration({ code: nonExistingUuid() }).expect(400);
 
-      await auth
-        .login({ loginOrEmail: dto.login, password: dto.password })
-        .expect(401);
+      // Аккаунт по-прежнему не подтверждён — переотправка доступна.
+      await auth.resendRegistrationEmail({ email: dto.email }).expect(204);
     });
   });
 

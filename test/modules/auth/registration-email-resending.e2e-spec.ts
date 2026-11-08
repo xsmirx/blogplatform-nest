@@ -68,9 +68,8 @@ describe('POST /auth/registration-email-resending — повторная отп�
       const newCode = ctx.emailService.lastRegistrationCodeFor(dto.email);
       await auth.confirmRegistration({ code: newCode }).expect(204);
 
-      await auth
-        .login({ loginOrEmail: dto.login, password: dto.password })
-        .expect(200);
+      // Аккаунт подтверждён — повторная переотправка уже недоступна.
+      await auth.resendRegistrationEmail({ email: dto.email }).expect(400);
     });
 
     it('старый код становится невалидным', async () => {

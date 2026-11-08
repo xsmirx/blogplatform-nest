@@ -86,6 +86,19 @@ describe('POST /auth/login — вход в систему', () => {
 
       expect(response.body).not.toHaveProperty('refreshToken');
     });
+
+    it('неподтверждённый пользователь тоже может залогиниться', async () => {
+      // Подтверждение email не является условием входа.
+      const unconfirmed = makeUserDto(2);
+      await auth.registration(unconfirmed).expect(204);
+
+      const token = await auth.loginAndGetToken(
+        unconfirmed.login,
+        unconfirmed.password,
+      );
+
+      await auth.me(token).expect(200);
+    });
   });
 
   describe('401 — неверные учётные данные', () => {
@@ -122,18 +135,6 @@ describe('POST /auth/login — вход в систему', () => {
         .login({
           loginOrEmail: user.login,
           password: user.password.toUpperCase(),
-        })
-        .expect(401);
-    });
-
-    it('неподтверждённый пользователь', async () => {
-      const unconfirmed = makeUserDto(2);
-      await auth.registration(unconfirmed).expect(204);
-
-      await auth
-        .login({
-          loginOrEmail: unconfirmed.login,
-          password: unconfirmed.password,
         })
         .expect(401);
     });

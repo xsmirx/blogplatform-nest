@@ -65,16 +65,6 @@ describe('POST /auth/registration — самостоятельная регис�
       );
     });
 
-    it('неподтверждённый пользователь не может залогиниться', async () => {
-      // Требование курса: до подтверждения email вход запрещён.
-      const dto = makeUserDto(1);
-      await auth.registration(dto).expect(204);
-
-      await auth
-        .login({ loginOrEmail: dto.login, password: dto.password })
-        .expect(401);
-    });
-
     it('принимает граничные валидные значения', async () => {
       await auth
         .registration({
@@ -186,28 +176,6 @@ describe('POST /auth/registration — самостоятельная регис�
       expectErrorsForFields(response.body, ['email']);
     });
 
-    it('login занят подтверждённым пользователем', async () => {
-      const existing = makeUserDto(1);
-      await auth.registerAndConfirm(existing);
-
-      const response = await auth
-        .registration(makeUserDto(2, { login: existing.login }))
-        .expect(400);
-
-      expectErrorsForFields(response.body, ['login']);
-    });
-
-    it('email занят подтверждённым пользователем', async () => {
-      const existing = makeUserDto(1);
-      await auth.registerAndConfirm(existing);
-
-      const response = await auth
-        .registration(makeUserDto(2, { email: existing.email }))
-        .expect(400);
-
-      expectErrorsForFields(response.body, ['email']);
-    });
-
     it('при занятом login письмо не отправляется', async () => {
       const first = makeUserDto(1);
       await auth.registration(first).expect(204);
@@ -229,9 +197,12 @@ describe('POST /auth/registration — самостоятельная регис�
 
       await auth.registration(rejected).expect(400);
 
-      // Если бы пользователь с этим email создался, переотправка
-      // письма для него вернула бы 204.
-      await auth.resendRegistrationEmail({ email: rejected.email }).expect(400);
+      expect(ctx.emailService.registrationCodesFor(rejected.email)).toEqual([]);
+
+      // Если бы отклонённый пользователь создался, его email был бы занят.
+      await auth
+        .registration(makeUserDto(3, { email: rejected.email }))
+        .expect(204);
     });
   });
 

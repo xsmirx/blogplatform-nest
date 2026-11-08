@@ -47,17 +47,13 @@ export class UserService {
 
     const passwordHash = await this.bcryptAdapter.generateHash(password);
     const confirmationCode = randomUUID();
-    const ttlMs = Number(
-      this.configService.get<string>('EMAIL_CONFIRMATION_CODE_TTL_MS') ??
-        DEFAULT_EMAIL_CONFIRMATION_CODE_TTL_MS,
-    );
-    const expirationDate = new Date(Date.now() + ttlMs);
+
     const user = this.UserModel.createInstance({
       login,
       email,
       passwordHash,
       confirmationCode,
-      expirationDate,
+      expirationDate: this.genetareExpirationDate(),
     });
     await this.usersRepository.save(user);
 
@@ -67,6 +63,41 @@ export class UserService {
     );
 
     return user;
+  }
+
+  async resendRegistrationEmail(email: string) {
+    const user = await this.usersRepository.findByEmail(email);
+    if (!user)
+      throw new DomainException({
+        code: DomainExceptionCode.ValidationError,
+        message: 'Validation failed',
+        extensions: [{ key: 'email', message: 'User with email not found' }],
+      });
+    if (user.emailConfirmation.isConfirmed)
+      throw new DomainException({
+        code: DomainExceptionCode.ValidationError,
+        message: 'Validation failed',
+        extensions: [{ key: 'email', message: 'Email already confirmed' }],
+      });
+
+    const confirmationCode = randomUUID();
+    user.setConfirmationCode(confirmationCode, this.genetareExpirationDate());
+
+    await this.usersRepository.save(user);
+
+    await this.emailService.sendRegistrationConfirmation(
+      user.email,
+      user.emailConfirmation.confirmationCode,
+    );
+  }
+
+  private genetareExpirationDate() {
+    const ttlMs = Number(
+      this.configService.get<string>('EMAIL_CONFIRMATION_CODE_TTL_MS') ??
+        DEFAULT_EMAIL_CONFIRMATION_CODE_TTL_MS,
+    );
+    const expirationDate = new Date(Date.now() + ttlMs);
+    return expirationDate;
   }
 
   async confirmUser(code: string) {

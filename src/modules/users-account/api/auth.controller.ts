@@ -9,6 +9,7 @@ import {
 import { CreateUserInputDto } from './input-dto/create-user.input-dto.js';
 import { UserService } from '../application/user.service.js';
 import { RegistrationConfirmationInputDto } from './input-dto/registration-confirmation.input-dto.js';
+import { RegistrationEmailResendingInputDto } from './input-dto/registration-email-resending.input-dto.js';
 
 @Controller('auth')
 export class AuthController {
@@ -42,7 +43,12 @@ export class AuthController {
   }
 
   @Post('registration-email-resending')
-  async registrationEmailResending() {}
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async registrationEmailResending(
+    @Body() body: RegistrationEmailResendingInputDto,
+  ) {
+    await this.userService.resendRegistrationEmail(body.email);
+  }
 
   @Get('me')
   async me() {}

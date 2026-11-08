@@ -4,9 +4,9 @@ import request from 'supertest';
 
 import { AppModule } from '../../src/app.module.js';
 import { appSetup } from '../../src/setup/app.setup.js';
-import { EmailService } from '../../src/modules/users-account/infrastucture/email.service.js';
 import { EmailServiceMock } from './email.service.mock.js';
 import { PATHS } from './constants.js';
+import { EmailService } from '../../src/modules/notifications/email.service.js';
 
 /** Supertest-агент, привязанный к http-серверу приложения. */
 export type HttpAgent = ReturnType<typeof request>;

@@ -1,5 +1,10 @@
 import { vi } from 'vitest';
-import type { EmailService } from '../../src/modules/users-account/infrastucture/email.service.js';
+import type { EmailService } from '../../src/modules/notifications/email.service.js';
+
+// `implements EmailService` напрямую нельзя: у класса есть private-поля
+// (mailerService), а их TS разрешает только наследовать. `keyof` видит
+// лишь публичные члены, поэтому тип ниже — публичный контракт сервиса.
+type EmailServiceContract = { [K in keyof EmailService]: EmailService[K] };
 
 export type SentEmail = {
   email: string;
@@ -14,7 +19,7 @@ export type SentEmail = {
  * довести до конца flow подтверждения регистрации и восстановления
  * пароля, т.к. по API коды наружу не отдаются.
  */
-export class EmailServiceMock implements EmailService {
+export class EmailServiceMock implements EmailServiceContract {
   public readonly registrationEmails: SentEmail[] = [];
   public readonly passwordRecoveryEmails: SentEmail[] = [];
 

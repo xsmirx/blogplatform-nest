@@ -7,10 +7,12 @@ import { UsersController } from './api/users.controller.js';
 import { BcryptAdapter } from './infrastucture/bcrypt.adapter.js';
 import { UserQueryRepository } from './infrastucture/query/user.query-repository.js';
 import { AuthController } from './api/auth.controller.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    NotificationsModule,
   ],
   controllers: [UsersController, AuthController],
   providers: [UserService, UserRepository, UserQueryRepository, BcryptAdapter],

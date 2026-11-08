@@ -6,6 +6,7 @@ import { BcryptAdapter } from '../infrastucture/bcrypt.adapter.js';
 import { DomainException } from '../../../core/exceptions/domain-exception.js';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes.js';
 import { randomUUID } from 'crypto';
+import { EmailService } from '../../notifications/email.service.js';
 
 @Injectable()
 export class UserService {
@@ -13,6 +14,7 @@ export class UserService {
     @InjectModel(User.name) protected readonly UserModel: UserModel,
     protected readonly usersRepository: UserRepository,
     protected readonly bcryptAdapter: BcryptAdapter,
+    protected readonly emailService: EmailService,
   ) {}
 
   async create({
@@ -51,7 +53,10 @@ export class UserService {
     });
     await this.usersRepository.save(user);
 
-    // s end email confirmaton
+    await this.emailService.sendRegistrationConfirmation(
+      user.email,
+      user.emailConfirmation.confirmationCode,
+    );
 
     return user;
   }

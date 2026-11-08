@@ -7,6 +7,9 @@ import { DomainException } from '../../../core/exceptions/domain-exception.js';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes.js';
 import { randomUUID } from 'crypto';
 import { EmailService } from '../../notifications/email.service.js';
+import { ConfigService } from '@nestjs/config';
+
+const DEFAULT_EMAIL_CONFIRMATION_CODE_TTL_MS = 60 * 60 * 1000;
 
 @Injectable()
 export class UserService {
@@ -15,6 +18,7 @@ export class UserService {
     protected readonly usersRepository: UserRepository,
     protected readonly bcryptAdapter: BcryptAdapter,
     protected readonly emailService: EmailService,
+    protected readonly configService: ConfigService,
   ) {}
 
   async create({
@@ -43,7 +47,11 @@ export class UserService {
 
     const passwordHash = await this.bcryptAdapter.generateHash(password);
     const confirmationCode = randomUUID();
-    const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const ttlMs = Number(
+      this.configService.get<string>('EMAIL_CONFIRMATION_CODE_TTL_MS') ??
+        DEFAULT_EMAIL_CONFIRMATION_CODE_TTL_MS,
+    );
+    const expirationDate = new Date(Date.now() + ttlMs);
     const user = this.UserModel.createInstance({
       login,
       email,

@@ -131,9 +131,37 @@ describe('POST /auth/registration-confirmation — подтверждение р
   });
 
   describe('400 — просроченный код', () => {
-    it.todo(
-      'код с истёкшим сроком жизни отклоняется — требует подмены времени (vi.useFakeTimers) ' +
-        'или конфигурируемого TTL кода подтверждения',
-    );
+    // UserService читает EMAIL_CONFIRMATION_CODE_TTL_MS через ConfigService
+    // при каждой генерации кода, а ConfigService смотрит в process.env
+    // в момент вызова. Поэтому достаточно временно подменить переменную —
+    // перезапускать приложение не нужно.
+    const SHORT_TTL_MS = 100;
+    let originalTtl: string | undefined;
+
+    beforeAll(() => {
+      originalTtl = process.env.EMAIL_CONFIRMATION_CODE_TTL_MS;
+      process.env.EMAIL_CONFIRMATION_CODE_TTL_MS = String(SHORT_TTL_MS);
+    });
+
+    afterAll(() => {
+      if (originalTtl === undefined) {
+        delete process.env.EMAIL_CONFIRMATION_CODE_TTL_MS;
+      } else {
+        process.env.EMAIL_CONFIRMATION_CODE_TTL_MS = originalTtl;
+      }
+    });
+
+    const waitForExpiration = () =>
+      new Promise((resolve) => setTimeout(resolve, SHORT_TTL_MS * 3));
+
+    it('код с истёкшим сроком жизни отклоняется', async () => {
+      const { code } = await register();
+      await waitForExpiration();
+
+      const response = await auth.confirmRegistration({ code }).expect(400);
+
+      expectErrorsForFields(response.body, ['code']);
+    });
+
   });
 });

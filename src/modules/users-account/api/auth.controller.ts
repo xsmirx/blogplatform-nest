@@ -7,8 +7,8 @@ import {
   Post,
 } from '@nestjs/common';
 import { CreateUserInputDto } from './input-dto/create-user.input-dto.js';
-import { UserViewDto } from './view-dto/user.view-dto.js';
 import { UserService } from '../application/user.service.js';
+import { RegistrationConfirmationInputDto } from './input-dto/registration-confirmation.input-dto.js';
 
 @Controller('auth')
 export class AuthController {
@@ -24,7 +24,12 @@ export class AuthController {
   async newPassword() {}
 
   @Post('registration-confirmation')
-  async registrationConfirmation() {}
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async registrationConfirmation(
+    @Body() body: RegistrationConfirmationInputDto,
+  ) {
+    await this.userService.confirmUser(body.code);
+  }
 
   @Post('registration')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -37,7 +42,7 @@ export class AuthController {
   }
 
   @Post('registration-email-resending')
-  async reghistrationEmailResending() {}
+  async registrationEmailResending() {}
 
   @Get('me')
   async me() {}

@@ -61,6 +61,20 @@ export class UserService {
     return user;
   }
 
+  async confirmUser(code: string) {
+    const user = await this.usersRepository.findByConfirmationCode(code);
+    if (!user)
+      throw new DomainException({
+        code: DomainExceptionCode.ValidationError,
+        message: 'Validation failed',
+        extensions: [{ key: 'code', message: 'Code is wrong' }],
+      });
+
+    user.confirmEmail();
+
+    await this.usersRepository.save(user);
+  }
+
   async delete(id: string) {
     const result = await this.usersRepository.delete(id);
     if (!result) throw new NotFoundException();

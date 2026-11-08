@@ -1,12 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, WithTimestamps } from 'mongoose';
+import { DomainException } from '../../../core/exceptions/domain-exception.js';
+import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes.js';
 
 @Schema({ _id: false })
 class EmailConfirmation {
   @Prop({ type: Boolean, required: true })
   isConfirmed: boolean;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, index: true })
   confirmationCode: string;
 
   @Prop({ type: Date, required: true })
@@ -68,6 +70,24 @@ export class User {
   public setConfirmationCode(confirmationCode: string, expirationDate: Date) {
     this.emailConfirmation.confirmationCode = confirmationCode;
     this.emailConfirmation.expirationDate = expirationDate;
+  }
+
+  public confirmEmail() {
+    if (this.emailConfirmation.isConfirmed) {
+      throw new DomainException({
+        code: DomainExceptionCode.ValidationError,
+        message: 'Validation failed',
+        extensions: [{ key: 'code', message: 'Code has already been applied' }],
+      });
+    }
+    if (this.emailConfirmation.expirationDate < new Date())
+      throw new DomainException({
+        code: DomainExceptionCode.ValidationError,
+        message: 'Validation failed',
+        extensions: [{ key: 'code', message: 'Code is expired' }],
+      });
+
+    this.emailConfirmation.isConfirmed = true;
   }
 }
 

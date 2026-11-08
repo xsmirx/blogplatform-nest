@@ -19,6 +19,12 @@ export class UserRepository {
     return this.UserModel.findOne({ email });
   }
 
+  async findByConfirmationCode(code: string): Promise<UserDocument | null> {
+    return this.UserModel.findOne({
+      'emailConfirmation.confirmationCode': code,
+    });
+  }
+
   async delete(id: string) {
     if (!isValidObjectId(id)) return false;
     const result = await this.UserModel.findByIdAndDelete(id);

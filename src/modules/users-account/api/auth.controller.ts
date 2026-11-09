@@ -7,19 +7,23 @@ import {
   Post,
 } from '@nestjs/common';
 import { CreateUserInputDto } from './input-dto/create-user.input-dto.js';
-import { UserService } from '../application/user.service.js';
 import { RegistrationConfirmationInputDto } from './input-dto/registration-confirmation.input-dto.js';
 import { RegistrationEmailResendingInputDto } from './input-dto/registration-email-resending.input-dto.js';
+import { PasswordRecoveryInputDto } from './input-dto/password-recovery.input-dto.js';
+import { AuthService } from '../application/auth.service.js';
 
 @Controller('auth')
 export class AuthController {
-  constructor(protected readonly userService: UserService) {}
+  constructor(protected readonly authService: AuthService) {}
 
   @Post('login')
   async login() {}
 
   @Post('password-recovery')
-  async passwordRecovery() {}
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async passwordRecovery(@Body() body: PasswordRecoveryInputDto) {
+    await this.authService.recoveryPassword(body.email);
+  }
 
   @Post('new-password')
   async newPassword() {}
@@ -29,13 +33,13 @@ export class AuthController {
   async registrationConfirmation(
     @Body() body: RegistrationConfirmationInputDto,
   ) {
-    await this.userService.confirmUser(body.code);
+    await this.authService.confirmEmail(body.code);
   }
 
   @Post('registration')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(@Body() body: CreateUserInputDto) {
-    await this.userService.create({
+    await this.authService.register({
       login: body.login,
       email: body.email,
       password: body.password,
@@ -47,7 +51,7 @@ export class AuthController {
   async registrationEmailResending(
     @Body() body: RegistrationEmailResendingInputDto,
   ) {
-    await this.userService.resendRegistrationEmail(body.email);
+    await this.authService.resendRegistrationEmail(body.email);
   }
 
   @Get('me')

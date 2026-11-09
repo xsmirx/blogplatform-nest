@@ -11,6 +11,7 @@ import { RegistrationConfirmationInputDto } from './input-dto/registration-confi
 import { RegistrationEmailResendingInputDto } from './input-dto/registration-email-resending.input-dto.js';
 import { PasswordRecoveryInputDto } from './input-dto/password-recovery.input-dto.js';
 import { AuthService } from '../application/auth.service.js';
+import { NewPasswordInputDto } from './input-dto/new-password.input-dto.js';
 
 @Controller('auth')
 export class AuthController {
@@ -26,7 +27,13 @@ export class AuthController {
   }
 
   @Post('new-password')
-  async newPassword() {}
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async newPassword(@Body() body: NewPasswordInputDto) {
+    await this.authService.newPassword({
+      newPassword: body.newPassword,
+      recoveryCode: body.recoveryCode,
+    });
+  }
 
   @Post('registration-confirmation')
   @HttpCode(HttpStatus.NO_CONTENT)

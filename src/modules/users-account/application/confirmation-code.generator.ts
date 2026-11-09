@@ -27,12 +27,16 @@ export class ConfirmationCodeGenerator {
     );
 
     const uuidCode = randomUUID();
-    const codeHash = hash('sha256', uuidCode);
+    const codeHash = this.hashCode(uuidCode);
 
     return {
       code: uuidCode,
       codeHash,
       expirationDate: new Date(Date.now() + ttlMs),
     };
+  }
+
+  hashCode(code: string) {
+    return hash('sha256', code);
   }
 }

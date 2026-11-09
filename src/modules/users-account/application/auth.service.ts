@@ -11,6 +11,7 @@ import {
 } from '../domain/password-recovery.entity.js';
 import { InjectModel } from '@nestjs/mongoose';
 import { PasswordRecoveryRepository } from '../infrastucture/password-recovery.repository.js';
+import { BcryptAdapter } from '../infrastucture/bcrypt.adapter.js';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
     protected readonly passwordRecoveryRepository: PasswordRecoveryRepository,
     protected readonly userService: UserService,
     protected readonly usersRepository: UserRepository,
+    protected readonly bcryptAdapter: BcryptAdapter,
     protected readonly emailService: EmailService,
     protected readonly codeGenerator: ConfirmationCodeGenerator,
   ) {}
@@ -42,6 +44,56 @@ export class AuthService {
     await this.passwordRecoveryRepository.save(recovery);
 
     await this.emailService.sendPasswordRecovery(email, code);
+  }
+
+  async newPassword({
+    newPassword,
+    recoveryCode,
+  }: {
+    newPassword: string;
+    recoveryCode: string;
+  }) {
+    const codeHash = this.codeGenerator.hashCode(recoveryCode);
+
+    const recovery =
+      await this.passwordRecoveryRepository.findByRecoveryCodeHashAndDelete(
+        codeHash,
+      );
+
+    if (!recovery)
+      throw new DomainException({
+        code: DomainExceptionCode.ValidationError,
+        message: 'Validation failed',
+        extensions: [
+          {
+            key: 'recoveryCode',
+            message: 'recoveryCode is incorrect or expired',
+          },
+        ],
+      });
+
+    const user = await this.usersRepository.findById(
+      recovery.userId.toString(),
+    );
+
+    if (!user)
+      throw new DomainException({
+        code: DomainExceptionCode.ValidationError,
+        message: 'Validation failed',
+        extensions: [
+          {
+            key: 'recoveryCode',
+            message: 'recoveryCode is incorrect or expired',
+          },
+        ],
+      });
+
+    const passwordHash = await this.bcryptAdapter.generateHash(newPassword);
+
+    user.setPasswordHash(passwordHash);
+
+    await this.usersRepository.save(user);
+    await this.passwordRecoveryRepository.deleteAllByUserId(user.id);
   }
 
   async confirmEmail(code: string) {

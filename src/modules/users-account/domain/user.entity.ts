@@ -89,6 +89,10 @@ export class User {
 
     this.emailConfirmation.isConfirmed = true;
   }
+
+  public setPasswordHash(passwordHash: string) {
+    this.passwordHash = passwordHash;
+  }
 }
 
 export type UserDocument = HydratedDocument<WithTimestamps<User>>;

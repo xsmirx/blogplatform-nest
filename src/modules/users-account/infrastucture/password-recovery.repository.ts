@@ -13,6 +13,13 @@ export class PasswordRecoveryRepository {
     protected readonly passwordRecoveryModel: PasswordRecoveryModel,
   ) {}
 
+  async findByRecoveryCodeHashAndDelete(codeHash: string) {
+    return await this.passwordRecoveryModel.findOneAndDelete({
+      codeHash,
+      expirationDate: { $gt: new Date() },
+    });
+  }
+
   async deleteAllByUserId(userId: string) {
     await this.passwordRecoveryModel.deleteMany({ userId });
   }

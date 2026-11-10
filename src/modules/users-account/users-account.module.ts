@@ -22,6 +22,7 @@ import {
   REFRESH_TOKEN_SERVICE_INJECT_TOKEN,
 } from './constants/auth-tokens.inject-constants.js';
 import { JwtService } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { JwtService } from '@nestjs/jwt';
     MongooseModule.forFeature([
       { name: PasswordRecovery.name, schema: PasswordRecoverySchema },
     ]),
+    PassportModule.register({ session: false }),
     NotificationsModule,
   ],
   controllers: [UsersController, AuthController],

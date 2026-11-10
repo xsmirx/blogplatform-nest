@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { UserService } from './user.service.js';
 import { UserRepository } from '../infrastucture/user.repository.js';
 import { DomainException } from '../../../core/exceptions/domain-exception.js';
@@ -12,6 +12,9 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { PasswordRecoveryRepository } from '../infrastucture/password-recovery.repository.js';
 import { BcryptAdapter } from '../infrastucture/bcrypt.adapter.js';
+import { UserContextDto } from '../guargs/dto/user-context.dto.js';
+import { JwtService } from '@nestjs/jwt';
+import { ACCESS_TOKEN_SERVICE_INJECT_TOKEN } from '../constants/auth-tokens.inject-constants.js';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +27,34 @@ export class AuthService {
     protected readonly bcryptAdapter: BcryptAdapter,
     protected readonly emailService: EmailService,
     protected readonly codeGenerator: ConfirmationCodeGenerator,
+    @Inject(ACCESS_TOKEN_SERVICE_INJECT_TOKEN)
+    protected readonly jwtService: JwtService,
   ) {}
+
+  async login(userId: string) {
+    const accessToken = this.jwtService.sign({
+      id: userId,
+    } satisfies UserContextDto);
+    return { accessToken };
+  }
+
+  async validateUser(
+    loginOrEmail: string,
+    password: string,
+  ): Promise<UserContextDto | null> {
+    const user = await this.usersRepository.findByLoginOrEmail(loginOrEmail);
+    if (!user) {
+      return null;
+    }
+    const isPasswordValid = await this.bcryptAdapter.checkPassword(
+      password,
+      user.passwordHash,
+    );
+    if (!isPasswordValid) {
+      return null;
+    }
+    return { id: user.id };
+  }
 
   async recoveryPassword(email: string) {
     const user = await this.usersRepository.findByEmail(email);

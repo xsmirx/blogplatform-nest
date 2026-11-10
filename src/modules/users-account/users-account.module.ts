@@ -15,6 +15,13 @@ import {
   PasswordRecoverySchema,
 } from './domain/password-recovery.entity.js';
 import { PasswordRecoveryRepository } from './infrastucture/password-recovery.repository.js';
+import { LocalStrategy } from './guargs/local/local.strategy.js';
+import { ConfigService } from '@nestjs/config';
+import {
+  ACCESS_TOKEN_SERVICE_INJECT_TOKEN,
+  REFRESH_TOKEN_SERVICE_INJECT_TOKEN,
+} from './constants/auth-tokens.inject-constants.js';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -26,6 +33,7 @@ import { PasswordRecoveryRepository } from './infrastucture/password-recovery.re
   ],
   controllers: [UsersController, AuthController],
   providers: [
+    LocalStrategy,
     UserService,
     UserRepository,
     UserQueryRepository,
@@ -33,6 +41,28 @@ import { PasswordRecoveryRepository } from './infrastucture/password-recovery.re
     BcryptAdapter,
     AuthService,
     ConfirmationCodeGenerator,
+    {
+      provide: ACCESS_TOKEN_SERVICE_INJECT_TOKEN,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) =>
+        new JwtService({
+          secret: config.getOrThrow('JWT_ACCESS_SECRET'),
+          signOptions: {
+            expiresIn: config.getOrThrow('JWT_ACCESS_EXPIRES_IN'),
+          },
+        }),
+    },
+    {
+      provide: REFRESH_TOKEN_SERVICE_INJECT_TOKEN,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) =>
+        new JwtService({
+          secret: config.getOrThrow('JWT_REFRESH_SECRET'),
+          signOptions: {
+            expiresIn: config.getOrThrow('JWT_REFRESH_EXPIRES_IN'),
+          },
+        }),
+    },
   ],
 })
 export class UsersAccountModule {}

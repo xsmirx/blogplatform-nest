@@ -19,6 +19,12 @@ export class UserRepository {
     return this.UserModel.findOne({ email });
   }
 
+  async findByLoginOrEmail(loginOrEmail: string) {
+    return this.UserModel.findOne({
+      $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
+    });
+  }
+
   async findByConfirmationCode(code: string): Promise<UserDocument | null> {
     return this.UserModel.findOne({
       'emailConfirmation.confirmationCode': code,

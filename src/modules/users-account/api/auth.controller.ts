@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserInputDto } from './input-dto/create-user.input-dto.js';
 import { RegistrationConfirmationInputDto } from './input-dto/registration-confirmation.input-dto.js';
@@ -12,13 +13,24 @@ import { RegistrationEmailResendingInputDto } from './input-dto/registration-ema
 import { PasswordRecoveryInputDto } from './input-dto/password-recovery.input-dto.js';
 import { AuthService } from '../application/auth.service.js';
 import { NewPasswordInputDto } from './input-dto/new-password.input-dto.js';
+import { LocalAuthGuard } from '../guargs/local/local-auth.guard.js';
+import { ExtractUserFromRequest } from '../decorators/extract-user-from-request.decorator.js';
+import { UserContextDto } from '../guargs/dto/user-context.dto.js';
+import { LoginViewDto } from './view-dto/login.view-dto.js';
 
 @Controller('auth')
 export class AuthController {
   constructor(protected readonly authService: AuthService) {}
 
   @Post('login')
-  async login() {}
+  @UseGuards(LocalAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async login(
+    @ExtractUserFromRequest() user: UserContextDto,
+  ): Promise<LoginViewDto> {
+    const result = await this.authService.login(user.id);
+    return { accessToken: result.accessToken };
+  }
 
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)

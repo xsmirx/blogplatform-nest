@@ -15,7 +15,7 @@ import { CreateUserInputDto } from './input-dto/create-user.input-dto.js';
 import { GetUserListQueryParams } from './input-dto/user-list.intut-dto.js';
 import { UserQueryRepository } from '../infrastucture/query/user.query-repository.js';
 import { UserViewDto } from './view-dto/user.view-dto.js';
-import { BasicAuthGuard } from '../../../core/guards/basic-auth.guard.js';
+import { BasicAuthGuard } from '../guargs/basic/basic-auth.guard.js';
 
 @Controller('users')
 @UseGuards(BasicAuthGuard)

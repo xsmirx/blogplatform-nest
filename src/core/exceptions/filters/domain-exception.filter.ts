@@ -50,12 +50,14 @@ export class DomainExceptionFilter implements ExceptionFilter {
     switch (exception.code) {
       case DomainExceptionCode.BadRequest:
       case DomainExceptionCode.ValidationError:
-        return {
-          errorsMessages: exception.extensions.map((extention) => ({
-            field: extention.key,
-            message: extention.message,
-          })),
-        } satisfies BadRequestError;
+        return exception.extensions.length
+          ? ({
+              errorsMessages: exception.extensions.map((extention) => ({
+                field: extention.key,
+                message: extention.message,
+              })),
+            } satisfies BadRequestError)
+          : undefined;
       case DomainExceptionCode.ConfirmationCodeExpired:
       case DomainExceptionCode.EmailNotConfirmed:
       case DomainExceptionCode.PasswordRecoveryCodeExpired:

@@ -34,7 +34,19 @@ import { ThrottlerModule } from '@nestjs/throttler';
       { name: PasswordRecovery.name, schema: PasswordRecoverySchema },
     ]),
     PassportModule.register({ session: false }),
-    ThrottlerModule.forRoot([{ ttl: 10000, limit: 5 }]),
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const enabled = config.get<string>('THROTTLE_ENABLED') !== 'false';
+        return [
+          {
+            ttl: Number(config.get<string>('THROTTLE_TTL_MS') || 10_000),
+            limit: Number(config.get<string>('THROTTLE_LIMIT') || 5),
+            skipIf: () => !enabled,
+          },
+        ];
+      },
+    }),
     NotificationsModule,
   ],
   controllers: [UsersController, AuthController],

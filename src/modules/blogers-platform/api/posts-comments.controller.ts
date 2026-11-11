@@ -11,8 +11,9 @@ export class PostsCommentsController {
   @Get()
   async getAllCommentsForPost(
     @Param('postId') postId: string,
-    @Query() query: Omit<GetCommentListQueryParams, 'postId'>,
+    @Query() query: GetCommentListQueryParams,
   ) {
-    return await this.commentsQueryRepository.getAll({ ...query, postId });
+    query.postId = postId;
+    return await this.commentsQueryRepository.getAll(query);
   }
 }

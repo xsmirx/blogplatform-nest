@@ -1,6 +1,3 @@
-export class UpdatePostInputDTO {
-  title: string;
-  shortDescription: string;
-  content: string;
-  blogId: string;
-}
+import { CreatePostInputDTO } from './create-post.input-dto.js';
+
+export class UpdatePostInputDTO extends CreatePostInputDTO {}

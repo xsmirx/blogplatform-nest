@@ -17,13 +17,20 @@ import { LocalAuthGuard } from '../guargs/local/local-auth.guard.js';
 import { ExtractUserFromRequest } from '../decorators/extract-user-from-request.decorator.js';
 import { UserContextDto } from '../guargs/dto/user-context.dto.js';
 import { LoginViewDto } from './view-dto/login.view-dto.js';
+import { JwtAuthGuard } from '../guargs/bearer/jwt-auth.guard.js';
+import { AuthQueryRepository } from '../infrastucture/query/auth.query-repository.js';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
-  constructor(protected readonly authService: AuthService) {}
+  constructor(
+    protected readonly authService: AuthService,
+    protected readonly authQueryRepository: AuthQueryRepository,
+  ) {}
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.OK)
   async login(
     @ExtractUserFromRequest() user: UserContextDto,
@@ -33,12 +40,14 @@ export class AuthController {
   }
 
   @Post('password-recovery')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(@Body() body: PasswordRecoveryInputDto) {
     await this.authService.recoveryPassword(body.email);
   }
 
   @Post('new-password')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(@Body() body: NewPasswordInputDto) {
     await this.authService.newPassword({
@@ -48,6 +57,7 @@ export class AuthController {
   }
 
   @Post('registration-confirmation')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationConfirmation(
     @Body() body: RegistrationConfirmationInputDto,
@@ -56,6 +66,7 @@ export class AuthController {
   }
 
   @Post('registration')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(@Body() body: CreateUserInputDto) {
     await this.authService.register({
@@ -66,6 +77,7 @@ export class AuthController {
   }
 
   @Post('registration-email-resending')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationEmailResending(
     @Body() body: RegistrationEmailResendingInputDto,
@@ -74,5 +86,8 @@ export class AuthController {
   }
 
   @Get('me')
-  async me() {}
+  @UseGuards(JwtAuthGuard)
+  async me(@ExtractUserFromRequest() user: UserContextDto) {
+    return await this.authQueryRepository.me(user.id);
+  }
 }

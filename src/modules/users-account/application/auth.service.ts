@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UserService } from './user.service.js';
-import { UserRepository } from '../infrastucture/user.repository.js';
+import { UsersRepository } from '../infrastucture/users.repository.js';
 import { DomainException } from '../../../core/exceptions/domain-exception.js';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes.js';
 import { EmailService } from '../../notifications/email.service.js';
@@ -23,7 +23,7 @@ export class AuthService {
     protected readonly passwordRecoveryModel: PasswordRecoveryModel,
     protected readonly passwordRecoveryRepository: PasswordRecoveryRepository,
     protected readonly userService: UserService,
-    protected readonly usersRepository: UserRepository,
+    protected readonly usersRepository: UsersRepository,
     protected readonly bcryptAdapter: BcryptAdapter,
     protected readonly emailService: EmailService,
     protected readonly codeGenerator: ConfirmationCodeGenerator,

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './domain/user.entity.js';
-import { UserRepository } from './infrastucture/user.repository.js';
+import { UsersRepository } from './infrastucture/users.repository.js';
 import { UserService } from './application/user.service.js';
 import { UsersController } from './api/users.controller.js';
 import { BcryptAdapter } from './infrastucture/bcrypt.adapter.js';
@@ -23,6 +23,9 @@ import {
 } from './constants/auth-tokens.inject-constants.js';
 import { JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './guargs/bearer/jwt.strategy.js';
+import { AuthQueryRepository } from './infrastucture/query/auth.query-repository.js';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -31,17 +34,20 @@ import { PassportModule } from '@nestjs/passport';
       { name: PasswordRecovery.name, schema: PasswordRecoverySchema },
     ]),
     PassportModule.register({ session: false }),
+    ThrottlerModule.forRoot([{ ttl: 10000, limit: 5 }]),
     NotificationsModule,
   ],
   controllers: [UsersController, AuthController],
   providers: [
     LocalStrategy,
+    JwtStrategy,
     UserService,
-    UserRepository,
+    UsersRepository,
     UserQueryRepository,
     PasswordRecoveryRepository,
     BcryptAdapter,
     AuthService,
+    AuthQueryRepository,
     ConfirmationCodeGenerator,
     {
       provide: ACCESS_TOKEN_SERVICE_INJECT_TOKEN,

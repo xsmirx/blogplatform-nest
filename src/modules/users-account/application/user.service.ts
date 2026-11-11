@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User, type UserModel } from '../domain/user.entity.js';
-import { UserRepository } from '../infrastucture/user.repository.js';
+import { UsersRepository } from '../infrastucture/users.repository.js';
 import { InjectModel } from '@nestjs/mongoose';
 import { BcryptAdapter } from '../infrastucture/bcrypt.adapter.js';
 import { DomainException } from '../../../core/exceptions/domain-exception.js';
@@ -12,7 +12,7 @@ import { EmailService } from '../../notifications/email.service.js';
 export class UserService {
   constructor(
     @InjectModel(User.name) protected readonly UserModel: UserModel,
-    protected readonly usersRepository: UserRepository,
+    protected readonly usersRepository: UsersRepository,
     protected readonly bcryptAdapter: BcryptAdapter,
     protected readonly emailService: EmailService,
     protected readonly codeGenerator: ConfirmationCodeGenerator,

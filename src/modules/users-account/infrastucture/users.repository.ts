@@ -4,7 +4,7 @@ import { User, UserDocument, type UserModel } from '../domain/user.entity.js';
 import { isValidObjectId } from 'mongoose';
 
 @Injectable()
-export class UserRepository {
+export class UsersRepository {
   constructor(@InjectModel(User.name) private UserModel: UserModel) {}
 
   async findById(id: string): Promise<UserDocument | null> {

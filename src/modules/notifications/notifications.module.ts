@@ -11,11 +11,8 @@ import { EmailService } from './email.service.js';
         transport: {
           service: 'gmail',
           auth: {
-            type: 'OAuth2',
             user: configService.get<string>('EMAIL_ADDRESS'),
-            clientId: configService.get<string>('GOOGLE_CLIENT_ID'),
-            clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET'),
-            refreshToken: configService.get<string>('GOOGLE_REFRESH_TOKEN'),
+            pass: configService.get<string>('GOOGLE_APP_PASSWORD'),
           },
         },
         defaults: {

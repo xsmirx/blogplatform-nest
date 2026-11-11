@@ -249,9 +249,50 @@ describe('POST /auth/new-password — установка нового парол
   });
 
   describe('истечение recoveryCode', () => {
-    it.todo(
-      'просроченный recoveryCode отклоняется с 400 — требует vi.useFakeTimers ' +
-        'или конфигурируемого TTL кода восстановления',
-    );
+    // ConfirmationCodeGenerator читает PASSWORD_RECOVERY_CODE_TTL_MS через
+    // ConfigService при каждой генерации кода, поэтому достаточно временно
+    // подменить переменную — перезапускать приложение не нужно.
+    const SHORT_TTL_MS = 100;
+    let originalTtl: string | undefined;
+
+    beforeAll(() => {
+      originalTtl = process.env.PASSWORD_RECOVERY_CODE_TTL_MS;
+      process.env.PASSWORD_RECOVERY_CODE_TTL_MS = String(SHORT_TTL_MS);
+    });
+
+    afterAll(() => {
+      if (originalTtl === undefined) {
+        delete process.env.PASSWORD_RECOVERY_CODE_TTL_MS;
+      } else {
+        process.env.PASSWORD_RECOVERY_CODE_TTL_MS = originalTtl;
+      }
+    });
+
+    const waitForExpiration = () =>
+      new Promise((resolve) => setTimeout(resolve, SHORT_TTL_MS * 3));
+
+    it('просроченный recoveryCode отклоняется с 400', async () => {
+      const expiringCode = await auth.requestRecoveryCode(user.email);
+      await waitForExpiration();
+
+      const response = await auth
+        .newPassword({ newPassword: NEW_PASSWORD, recoveryCode: expiringCode })
+        .expect(400);
+
+      expectErrorsForFields(response.body, ['recoveryCode']);
+    });
+
+    it('при просроченном коде пароль не меняется', async () => {
+      const expiringCode = await auth.requestRecoveryCode(user.email);
+      await waitForExpiration();
+
+      await auth
+        .newPassword({ newPassword: NEW_PASSWORD, recoveryCode: expiringCode })
+        .expect(400);
+
+      await auth
+        .login({ loginOrEmail: user.login, password: user.password })
+        .expect(200);
+    });
   });
 });

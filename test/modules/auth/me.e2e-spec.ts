@@ -13,6 +13,10 @@ import {
   type UserInputModel,
 } from '../../helpers/data.js';
 import { expectedMeView } from '../../helpers/expected.js';
+import { JwtService } from '@nestjs/jwt';
+import { ACCESS_TOKEN_SERVICE_INJECT_TOKEN } from '../../../src/modules/users-account/constants/auth-tokens.inject-constants.js';
+
+type JwtPayload = { id: string; iat: number; exp: number };
 
 describe('GET /auth/me — информация о текущем пользователе (Bearer)', () => {
   let ctx: TestAppContext;
@@ -132,9 +136,32 @@ describe('GET /auth/me — информация о текущем пользов
   });
 
   describe('истечение токена', () => {
-    it.todo(
-      'accessToken протухает через 5 минут — требует vi.useFakeTimers ' +
-        'или отдельного приложения с коротким JWT_ACCESS_EXPIRES_IN (например 1s)',
-    );
+    // Ждать реальные 5 минут нельзя, а JWT_ACCESS_EXPIRES_IN читается один
+    // раз при сборке модуля. Поэтому проверяем правило по частям:
+    //   - выданный токен живёт ровно 5 минут (exp - iat);
+    //   - токен с истёкшим exp отклоняется стратегией.
+    const ACCESS_TOKEN_TTL_SEC = 5 * 60;
+
+    let accessTokenService: JwtService;
+
+    beforeAll(() => {
+      accessTokenService = ctx.moduleRef.get<JwtService>(
+        ACCESS_TOKEN_SERVICE_INJECT_TOKEN,
+        { strict: false },
+      );
+    });
+
+    it('accessToken выдаётся сроком на 5 минут', () => {
+      const { iat, exp } = accessTokenService.decode<JwtPayload>(token);
+
+      expect(exp - iat).toBe(ACCESS_TOKEN_TTL_SEC);
+    });
+
+    it('просроченный accessToken отклоняется с 401', async () => {
+      const { id } = accessTokenService.decode<JwtPayload>(token);
+      const expiredToken = accessTokenService.sign({ id }, { expiresIn: -10 });
+
+      await auth.me(expiredToken).expect(401);
+    });
   });
 });

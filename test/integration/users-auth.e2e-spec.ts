@@ -44,7 +44,7 @@ describe('Интеграция Users ↔ Auth', () => {
   });
 
   describe('пользователь, созданный админом (POST /users)', () => {
-    it('считается подтверждённым и может сразу залогиниться', async () => {
+    it('может залогиниться до подтверждения email', async () => {
       const dto = makeUserDto(1);
       await users.createAndGet(dto);
 
@@ -85,9 +85,31 @@ describe('Интеграция Users ↔ Auth', () => {
       expectErrorsForFields(response.body, ['email']);
     });
 
-    it('переотправка письма подтверждения для него — 400 (уже подтверждён)', async () => {
+    it('при создании получает письмо подтверждения, как при регистрации', async () => {
       const dto = makeUserDto(1);
       await users.createAndGet(dto);
+
+      expect(ctx.emailService.registrationCodesFor(dto.email)).toHaveLength(1);
+    });
+
+    it('переотправка письма подтверждения для него — 204, приходит новый код', async () => {
+      const dto = makeUserDto(1);
+      await users.createAndGet(dto);
+      const firstCode = ctx.emailService.lastRegistrationCodeFor(dto.email);
+
+      await auth.resendRegistrationEmail({ email: dto.email }).expect(204);
+
+      const codes = ctx.emailService.registrationCodesFor(dto.email);
+      expect(codes).toHaveLength(2);
+      expect(codes[1]).not.toBe(firstCode);
+    });
+
+    it('подтверждается кодом из письма, после чего переотправка — 400', async () => {
+      const dto = makeUserDto(1);
+      await users.createAndGet(dto);
+      const code = ctx.emailService.lastRegistrationCodeFor(dto.email);
+
+      await auth.confirmRegistration({ code }).expect(204);
 
       const response = await auth
         .resendRegistrationEmail({ email: dto.email })
